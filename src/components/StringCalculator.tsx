@@ -6,13 +6,25 @@ const StringCalculator: React.FC = () => {
   const [input, setInput] = useState('');
   const [result, setResult] = useState<number | null>(null);
 
+  const add = (numbers: string): number => {
+    // Handle empty string
+    if (numbers.trim() === '') {
+      return 0;
+    }
+
+    // Split and convert to numbers
+    return numbers.split(',')
+      .map(num => parseInt(num.trim(), 10))
+      .reduce((sum, num) => sum + num, 0);
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
   };
 
   const handleCalculate = () => {
-    // Basic implementation to be expanded
-    setResult(input ? input.split(',').reduce((sum, num) => sum + parseInt(num, 10), 0) : 0);
+    const calculatedResult = add(input);
+    setResult(calculatedResult);
   };
 
   return (
