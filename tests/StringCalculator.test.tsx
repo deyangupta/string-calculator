@@ -24,4 +24,15 @@ describe('StringCalculator', () => {
     
     expect(screen.getByText('Result: 6')).toBeInTheDocument();
   });
+
+  test('supports new line delimiters', () => {
+    render(<StringCalculator />);
+    const input = screen.getByPlaceholderText(/enter/i);
+    const calculateButton = screen.getByText(/calculate/i);
+    
+    fireEvent.change(input, { target: { value: '1\n2,3' } });
+    fireEvent.click(calculateButton);
+    
+    expect(screen.getByText('Result: 6')).toBeInTheDocument();
+  });
 });

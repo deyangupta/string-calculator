@@ -12,8 +12,11 @@ const StringCalculator: React.FC = () => {
       return 0;
     }
 
+    // Replace newlines with comma
+    const normalizedNumbers = numbers.replace(/\n/g, ',');
+
     // Split and convert to numbers
-    return numbers.split(',')
+    return normalizedNumbers.split(',')
       .map(num => parseInt(num.trim(), 10))
       .reduce((sum, num) => sum + num, 0);
   };
@@ -36,7 +39,7 @@ const StringCalculator: React.FC = () => {
           type="text" 
           value={input}
           onChange={handleInputChange}
-          placeholder="Enter comma-separated numbers"
+          placeholder="Enter numbers (comma or newline)"
         />
         <Button onClick={handleCalculate}>Calculate</Button>
       </div>
