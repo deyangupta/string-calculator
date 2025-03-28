@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const StringCalculator: React.FC = () => {
   const [input, setInput] = useState('');
   const [result, setResult] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const add = (numbers: string): number => {
     // Handle empty string
@@ -12,22 +14,48 @@ const StringCalculator: React.FC = () => {
       return 0;
     }
 
-    // Replace newlines with comma
-    const normalizedNumbers = numbers.replace(/\n/g, ',');
+    // Handle custom delimiters
+    let delimiter = ',';
+    let numbersString = numbers;
 
-    // Split and convert to numbers
-    return normalizedNumbers.split(',')
-      .map(num => parseInt(num.trim(), 10))
-      .reduce((sum, num) => sum + num, 0);
+    // Check for custom delimiter
+    if (numbers.startsWith('//')) {
+      const delimiterEnd = numbers.indexOf('\n');
+      delimiter = numbers.substring(2, delimiterEnd);
+      numbersString = numbers.substring(delimiterEnd + 1);
+    }
+
+    // Replace newlines with delimiter
+    numbersString = numbersString.replace(/\n/g, delimiter);
+
+    // Convert to numbers and check for negatives
+    const numberArray = numbersString.split(delimiter)
+      .map(num => parseInt(num.trim(), 10));
+
+    // Check for negative numbers
+    const negatives = numberArray.filter(num => num < 0);
+    if (negatives.length > 0) {
+      throw new Error(`negative numbers not allowed: ${negatives.join(', ')}`);
+    }
+
+    // Sum the numbers
+    return numberArray.reduce((sum, num) => sum + num, 0);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value);
+    setError(null);
   };
 
   const handleCalculate = () => {
-    const calculatedResult = add(input);
-    setResult(calculatedResult);
+    try {
+      const calculatedResult = add(input);
+      setResult(calculatedResult);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      setResult(null);
+    }
   };
 
   return (
@@ -39,7 +67,7 @@ const StringCalculator: React.FC = () => {
           type="text" 
           value={input}
           onChange={handleInputChange}
-          placeholder="Enter numbers (comma or newline)"
+          placeholder="Enter numbers (no negative numbers!)"
         />
         <Button onClick={handleCalculate}>Calculate</Button>
       </div>
@@ -48,6 +76,12 @@ const StringCalculator: React.FC = () => {
         <div className="bg-green-100 p-3 rounded">
           <p className="text-green-800">Result: {result}</p>
         </div>
+      )}
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
     </div>
   );

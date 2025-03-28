@@ -35,4 +35,26 @@ describe('StringCalculator', () => {
     
     expect(screen.getByText('Result: 6')).toBeInTheDocument();
   });
+
+  test('supports custom delimiters', () => {
+    render(<StringCalculator />);
+    const input = screen.getByPlaceholderText(/enter/i);
+    const calculateButton = screen.getByText(/calculate/i);
+    
+    fireEvent.change(input, { target: { value: '//;\n1;2;3' } });
+    fireEvent.click(calculateButton);
+    
+    expect(screen.getByText('Result: 6')).toBeInTheDocument();
+  });
+
+  test('throws error for negative numbers', () => {
+    render(<StringCalculator />);
+    const input = screen.getByPlaceholderText(/enter/i);
+    const calculateButton = screen.getByText(/calculate/i);
+    
+    fireEvent.change(input, { target: { value: '1,-2,3' } });
+    fireEvent.click(calculateButton);
+    
+    expect(screen.getByText(/negative numbers not allowed: -2/i)).toBeInTheDocument();
+  });
 });
