@@ -1,60 +1,49 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import StringCalculator from '../src/components/StringCalculator';
 
-describe('StringCalculator', () => {
-  test('handles empty string', () => {
+describe('StringCalculator UI', () => {
+  it('renders the calculator UI', () => {
     render(<StringCalculator />);
-    const input = screen.getByPlaceholderText(/enter/i);
-    const calculateButton = screen.getByText(/calculate/i);
-    
-    fireEvent.change(input, { target: { value: '' } });
-    fireEvent.click(calculateButton);
-    
-    expect(screen.getByText('Result: 0')).toBeInTheDocument();
+    expect(screen.getByText('🧮 String Calculator')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Calculate' })).toBeInTheDocument();
   });
 
-  test('adds comma-separated numbers', () => {
+  it('shows result for valid input', () => {
     render(<StringCalculator />);
-    const input = screen.getByPlaceholderText(/enter/i);
-    const calculateButton = screen.getByText(/calculate/i);
-    
-    fireEvent.change(input, { target: { value: '1,2,3' } });
-    fireEvent.click(calculateButton);
-    
-    expect(screen.getByText('Result: 6')).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: '1,2,3' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Calculate' }));
+    expect(screen.getByText('✅ Result: 6')).toBeInTheDocument();
   });
 
-  test('supports new line delimiters', () => {
+  it('handles newline in input', () => {
     render(<StringCalculator />);
-    const input = screen.getByPlaceholderText(/enter/i);
-    const calculateButton = screen.getByText(/calculate/i);
-    
-    fireEvent.change(input, { target: { value: '1\n2,3' } });
-    fireEvent.click(calculateButton);
-    
-    expect(screen.getByText('Result: 6')).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: '1\n2,3' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Calculate' }));
+    expect(screen.getByText('✅ Result: 6')).toBeInTheDocument();
   });
 
-  test('supports custom delimiters', () => {
+  it('shows error on negative numbers', () => {
     render(<StringCalculator />);
-    const input = screen.getByPlaceholderText(/enter/i);
-    const calculateButton = screen.getByText(/calculate/i);
-    
-    fireEvent.change(input, { target: { value: '//;\n1;2;3' } });
-    fireEvent.click(calculateButton);
-    
-    expect(screen.getByText('Result: 6')).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: '1,-2,-3' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Calculate' }));
+    expect(
+      screen.getByText('❌ Error: negative numbers not allowed: -2, -3')
+    ).toBeInTheDocument();
   });
 
-  test('throws error for negative numbers', () => {
+  it('supports custom delimiter', () => {
     render(<StringCalculator />);
-    const input = screen.getByPlaceholderText(/enter/i);
-    const calculateButton = screen.getByText(/calculate/i);
-    
-    fireEvent.change(input, { target: { value: '1,-2,3' } });
-    fireEvent.click(calculateButton);
-    
-    expect(screen.getByText(/negative numbers not allowed: -2/i)).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: '//;\n2;3;5' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Calculate' }));
+    expect(screen.getByText('✅ Result: 10')).toBeInTheDocument();
   });
 });
